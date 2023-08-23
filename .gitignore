@@ -1,4 +1,4 @@
-script.js
+
 
 document.addEventListener("DOMContentLoaded",function(){
 	this.forms[0].addEventListener("change",e => {
@@ -6,8 +6,6 @@ document.addEventListener("DOMContentLoaded",function(){
 	});
 });
 
-
-styles.css
 
 /* ==========================================================> Animations */
 

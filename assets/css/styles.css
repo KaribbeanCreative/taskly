@@ -1,0 +1,167 @@
+/* 
+    Author : Karibbean Creative
+    Date : 23.08.2023
+    Version : 1.0
+*/
+
+
+/* ==========================================================> Import font */
+
+/* Syne */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&display=swap');
+
+/* Outfit */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400&display=swap');
+
+
+/* ==========================================================> Global */
+
+* {
+   box-sizing: border-box;
+   margin: 0;
+   padding: 0;
+}
+
+html {
+   font-size: 62.5%;
+   overflow-x: hidden;
+}
+
+body {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   background-color: #1E1D1D;
+   color: #efefef;
+   font-family: "Outfit", sans-serif;
+}
+
+
+/* ==========================================================> Titles */
+
+.heading-primary {
+   font-family: 'Syne', sans-serif;
+   font-size: 4.4rem;
+   color: #505050;
+   margin-bottom: 3.2rem;
+   display: flex;
+   justify-content: center;
+}
+
+
+/* ==========================================================> Links */
+
+
+
+/* ==========================================================> Header */
+
+#header-section {
+   width: 100%;
+   margin: 5.2rem auto;
+   font-size: 1.3rem;
+}
+
+
+/* ==========================================================> Add Task form */
+
+.addTask {
+   display: flex;
+   justify-content: center;
+}
+
+#addTextTask {
+   width: 30rem;
+   margin-right: 2rem;
+   font-family: 'Outfit', sans-serif;
+   font-size: 1.6rem;
+   color: #505050;
+}
+
+.button-addTask {
+   padding: 1rem 2rem;
+   background-color: #141617;
+   color: #80b918;
+   font-size: 1.8rem;
+   border: none;
+   border-radius: 0.5rem;
+}
+
+.button-addTask:hover {
+   background-color: #80b918;
+   color: #141617;
+   border: none;
+   cursor: pointer;
+}
+
+
+/* ==========================================================> Task section */
+
+#contentTask {
+   width: 80%;
+}
+
+.task {
+   min-width: 60%;
+   height: 4.8rem;
+   margin: 1.5rem 0;
+   padding-left: 1rem;
+   position: relative;
+   display: flex;
+   align-items: center;
+   border-radius: 0.5rem;
+   background: #2d2c2dd2;
+   box-shadow: #00000059 0px 5px 15px;
+}
+
+.task input {
+   margin: 0 0.8rem;
+   background-color: #2d2c2dd2;
+   border: none;
+   color: #c9c9c9;
+   font-family: 'Outfit', sans-serif;
+   font-size: 1.6rem;
+}
+
+.completeTask,
+.EditTask {
+   position: absolute;
+   border: none;
+   background-color: #313131d2;
+   cursor: pointer;
+   padding: 0.7rem 1rem;
+   border-radius: 0.4rem;
+}
+
+.completeTask:hover,
+.EditTask:hover {
+   background-color: #141617;
+}
+
+.completeTask {
+   right: 2rem;
+}
+
+.EditTask {
+   margin-right: 2rem;
+   right: 4.5rem;
+}
+
+
+/* ==========================================================> Footer */
+
+#footer {
+   font-size: 1.4rem;
+   color: #8d8d8d;
+   font-family: 'Syne', sans-serif;
+
+}
+
+.footer-link {
+   color: #505050;
+   text-decoration: none;
+}
+
+.footer-link:hover {
+   color: #e7b913;
+   text-decoration: none;
+}

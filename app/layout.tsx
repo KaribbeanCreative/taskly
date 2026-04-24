@@ -9,7 +9,7 @@ const rubik = Rubik({
 })
 
 export const metadata: Metadata = {
-  title: '✨ Taskly',
+  title: 'Taskly',
   description: '📋 Tasks, 🎯 Goals & 🔥 Habits tracker',
 }
 

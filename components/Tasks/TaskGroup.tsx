@@ -22,7 +22,7 @@ export default function TaskGroup({ group }: TaskGroupProps) {
   const completedCount = group.tasks.filter((t) => t.completed).length
 
   return (
-    <div className={styles.group}>
+    <div className={`${styles.group}${showIconPicker ? ` ${styles.elevated}` : ''}`}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <div className={styles.iconWrap}>

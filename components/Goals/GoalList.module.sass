@@ -1,0 +1,61 @@
+@use "../../styles/variables" as *
+@use "../../styles/mixins" as *
+@use "../../styles/animations" as *
+
+.container
+  +fade-in
+
+.header
+  display: flex
+  align-items: center
+  justify-content: space-between
+  margin-bottom: 24px
+
+.title
+  +title
+  color: $text-primary
+
+.addButton
+  +icon-button
+
+.tabs
+  display: flex
+  gap: 4px
+  margin-bottom: 20px
+  overflow-x: auto
+  -webkit-overflow-scrolling: touch
+
+  &::-webkit-scrollbar
+    display: none
+
+.tab
+  +base-2m
+  color: $text-tertiary
+  padding: 8px 16px
+  border-radius: 8px
+  white-space: nowrap
+  transition: all $hover-transition
+
+  &:hover
+    color: $text-secondary
+    background: $hover-bg
+
+  &.active
+    color: $text-primary
+    background: rgba($n2, .1)
+
+.progress
+  +caption-r
+  color: $text-tertiary
+  margin-bottom: 16px
+
+.list
+  display: flex
+  flex-direction: column
+  gap: 8px
+
+.empty
+  text-align: center
+  padding: 48px 0
+  +base-r
+  color: $text-secondary

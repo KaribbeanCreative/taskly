@@ -1,0 +1,66 @@
+@use "../../styles/variables" as *
+@use "../../styles/mixins" as *
+@use "../../styles/animations" as *
+
+.container
+  padding-left: 30px
+  margin-top: 8px
+  display: flex
+  flex-direction: column
+  gap: 4px
+  +fade-in
+
+.item
+  display: flex
+  align-items: center
+  gap: 8px
+  padding: 4px 0
+
+.checkbox
+  width: 16px
+  height: 16px
+  min-width: 16px
+  border-radius: 4px
+  border: 1.5px solid rgba($n2, .2)
+  display: flex
+  align-items: center
+  justify-content: center
+  +small
+  color: $text-primary
+  transition: all $hover-transition
+
+  &.checked
+    background: rgba($n2, .12)
+    border-color: rgba($n2, .3)
+
+.title
+  +caption-r
+  color: $text-secondary
+
+  &.done
+    text-decoration: line-through
+    color: $text-tertiary
+
+.deleteBtn
+  margin-left: auto
+  +small
+  color: $text-tertiary
+  opacity: 0
+  transition: opacity $hover-transition
+
+  .item:hover &
+    opacity: 1
+
+  &:hover
+    color: $priority-high
+
+.addRow
+  padding: 4px 0
+
+.input
+  +caption-r
+  color: $text-primary
+  width: 100%
+
+  &::placeholder
+    color: $text-tertiary

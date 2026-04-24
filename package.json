@@ -1,0 +1,29 @@
+{
+  "name": "taskly",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@hello-pangea/dnd": "^17.0.0",
+    "classnames": "^2.5.1",
+    "next": "^16.1.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-textarea-autosize": "^8.5.7",
+    "uuid": "^11.1.0",
+    "zustand": "^5.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/uuid": "^10",
+    "sass": "^1.87.0",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,35 @@
+@use "../../styles/variables" as *
+@use "../../styles/mixins" as *
+@use "../../styles/animations" as *
+
+.container
+  +fade-in
+
+.header
+  display: flex
+  align-items: center
+  justify-content: space-between
+  margin-bottom: 24px
+
+.title
+  +title
+  color: $text-primary
+
+.addButton
+  +icon-button
+
+.list
+  display: flex
+  flex-direction: column
+  gap: 20px
+
+.empty
+  text-align: center
+  padding: 48px 0
+  +base-r
+  color: $text-secondary
+
+.emptyHint
+  +caption-r
+  color: $text-tertiary
+  margin-top: 8px

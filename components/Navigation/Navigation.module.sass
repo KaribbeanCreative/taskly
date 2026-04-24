@@ -1,0 +1,107 @@
+@use "../../styles/variables" as *
+@use "../../styles/mixins" as *
+
+// Desktop sidebar
+.sidebar
+  width: $nav-width
+  height: 100vh
+  position: sticky
+  top: 0
+  display: flex
+  flex-direction: column
+  padding: 24px 16px
+  border-right: 1px solid rgba($n2, .08)
+
+  +tablet
+    width: $nav-compact
+
+  +mobile
+    display: none
+
+.logo
+  +title
+  color: $text-primary
+  padding: 8px 12px
+  margin-bottom: 32px
+
+  +tablet
+    text-align: center
+    padding: 8px 0
+    font-size: 0
+    &::first-letter
+      font-size: 20px
+
+.menu
+  list-style: none
+  display: flex
+  flex-direction: column
+  gap: 4px
+
+.menuItem
+  display: flex
+  align-items: center
+  gap: 12px
+  width: 100%
+  padding: 10px 12px
+  border-radius: 10px
+  border: 1px solid transparent
+  +base-2m
+  color: $text-secondary
+  transition: all $hover-transition
+
+  +tablet
+    justify-content: center
+    padding: 10px
+
+  &:hover
+    +glass-hover
+    color: $text-primary
+
+  &.active
+    background: rgba($n2, .1)
+    color: $text-primary
+
+.icon
+  font-size: 18px
+  width: 24px
+  text-align: center
+  flex-shrink: 0
+
+.label
+  +tablet
+    display: none
+
+// Mobile bottom bar
+.bottomBar
+  display: none
+
+  +mobile
+    display: flex
+    position: fixed
+    bottom: 0
+    left: 0
+    right: 0
+    height: $bottom-bar-height
+    background: rgba($n4, .95)
+    backdrop-filter: blur(20px)
+    border-top: 1px solid rgba($n2, .08)
+    z-index: 100
+
+.bottomItem
+  flex: 1
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  gap: 4px
+  color: $text-tertiary
+  transition: color $hover-transition
+
+  &.active
+    color: $text-primary
+
+  .icon
+    font-size: 20px
+
+.bottomLabel
+  +small

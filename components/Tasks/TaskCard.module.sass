@@ -1,0 +1,113 @@
+@use "../../styles/variables" as *
+@use "../../styles/mixins" as *
+@use "../../styles/animations" as *
+
+.card
+  padding: 10px 12px
+  border-radius: 8px
+  border: 1px solid transparent
+  transition: background $hover-transition, border-color $hover-transition, box-shadow $hover-transition, backdrop-filter $hover-transition
+  +fade-in
+
+  &:hover
+    +glass-hover
+
+  &.completed
+    opacity: 0.5
+
+.row
+  display: flex
+  align-items: flex-start
+  gap: 10px
+
+.checkbox
+  width: 20px
+  height: 20px
+  min-width: 20px
+  border-radius: 6px
+  border: 1.5px solid rgba($n2, .25)
+  display: flex
+  align-items: center
+  justify-content: center
+  +small
+  color: $text-primary
+  transition: all $hover-transition
+  margin-top: 2px
+
+  &.checked
+    background: rgba($n2, .15)
+    border-color: rgba($n2, .4)
+
+.priority
+  width: 8px
+  height: 8px
+  min-width: 8px
+  border-radius: 50%
+  margin-top: 7px
+
+  &.low
+    background: $priority-low
+
+  &.medium
+    background: $priority-medium
+
+  &.high
+    background: $priority-high
+
+.content
+  flex: 1
+  min-width: 0
+
+.title
+  +base-2r
+  color: $text-primary
+  display: block
+
+  &.done
+    text-decoration: line-through
+    color: $text-tertiary
+
+.meta
+  display: flex
+  align-items: center
+  gap: 8px
+  margin-top: 2px
+
+.date
+  +caption-r
+  color: $text-tertiary
+
+  &.overdue
+    color: $priority-high
+
+.subCount
+  +caption-r
+  color: $text-tertiary
+  cursor: pointer
+  padding: 0
+  &:hover
+    color: $text-secondary
+
+.actions
+  display: flex
+  gap: 2px
+  opacity: 0
+  transition: opacity $hover-transition
+
+  .card:hover &
+    opacity: 1
+
+.smallBtn
+  width: 24px
+  height: 24px
+  border-radius: 6px
+  display: flex
+  align-items: center
+  justify-content: center
+  +small
+  color: $text-tertiary
+  transition: all $hover-transition
+
+  &:hover
+    background: $hover-bg
+    color: $text-primary

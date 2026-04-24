@@ -1,0 +1,60 @@
+@use "../../styles/variables" as *
+@use "../../styles/mixins" as *
+@use "../../styles/animations" as *
+
+.card
+  +card
+  +card-border
+  +fade-in
+  display: flex
+  align-items: center
+  gap: 12px
+  padding: 14px 16px
+  transition: background $hover-transition, box-shadow $hover-transition, backdrop-filter $hover-transition
+
+  &:hover
+    +glass-hover
+
+  &.completed
+    opacity: 0.5
+
+  &.fading
+    +fade-out
+
+.checkbox
+  width: 22px
+  height: 22px
+  min-width: 22px
+  border-radius: 6px
+  border: 1.5px solid rgba($n2, .25)
+  display: flex
+  align-items: center
+  justify-content: center
+  +small
+  color: $text-primary
+  transition: all $hover-transition
+
+  &.checked
+    background: rgba($n2, .15)
+    border-color: rgba($n2, .4)
+
+.title
+  +base-2r
+  color: $text-primary
+  flex: 1
+
+  &.done
+    text-decoration: line-through
+    color: $text-tertiary
+
+.deleteBtn
+  +caption-sm
+  color: $text-tertiary
+  opacity: 0
+  transition: opacity $hover-transition
+
+  .card:hover &
+    opacity: 1
+
+  &:hover
+    color: $priority-high

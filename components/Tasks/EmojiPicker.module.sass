@@ -1,0 +1,36 @@
+@use "../../styles/variables" as *
+@use "../../styles/mixins" as *
+@use "../../styles/animations" as *
+
+.picker
+  position: absolute
+  top: calc(100% + 8px)
+  left: 0
+  z-index: 50
+  padding: 12px
+  background: rgba($n4, .95)
+  backdrop-filter: blur(20px)
+  -webkit-backdrop-filter: blur(20px)
+  border: $border-subtle
+  border-radius: $card-radius
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .4)
+  display: grid
+  grid-template-columns: repeat(8, 1fr)
+  gap: 4px
+  +fade-in
+
+  +mobile
+    grid-template-columns: repeat(6, 1fr)
+
+.emoji
+  width: 32px
+  height: 32px
+  font-size: 18px
+  display: flex
+  align-items: center
+  justify-content: center
+  border-radius: 6px
+  transition: background $hover-transition
+
+  &:hover
+    background: $hover-bg

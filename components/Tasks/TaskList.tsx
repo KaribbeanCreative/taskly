@@ -5,6 +5,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { useTasksStore } from '@/store/useTasksStore'
 import TaskGroup from './TaskGroup'
 import TaskForm from './TaskForm'
+import EmojiPicker from './EmojiPicker'
 import styles from './TaskList.module.sass'
 
 const GROUP_COLORS = ['#5b5bd6', '#e5484d', '#30a46c', '#f76b15', '#0090ff', '#ab4aba']
@@ -13,6 +14,8 @@ const GROUP_ICONS = ['📋', '🎯', '💡', '🔥', '⭐', '📌', '🚀', '�
 export default function TaskList() {
   const { groups, addGroup, reorderGroups, moveTask, reorderTasks } = useTasksStore()
   const [showForm, setShowForm] = useState(false)
+  const [newGroupIcon, setNewGroupIcon] = useState(GROUP_ICONS[0])
+  const [showIconPicker, setShowIconPicker] = useState(false)
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination, type } = result
@@ -30,28 +33,53 @@ export default function TaskList() {
     }
   }
 
+  const openForm = () => {
+    setNewGroupIcon(GROUP_ICONS[groups.length % GROUP_ICONS.length])
+    setShowForm(true)
+  }
+
   const handleAddGroup = (title: string) => {
     const colorIndex = groups.length % GROUP_COLORS.length
-    const iconIndex = groups.length % GROUP_ICONS.length
-    addGroup(title, GROUP_ICONS[iconIndex], GROUP_COLORS[colorIndex])
+    addGroup(title, newGroupIcon, GROUP_COLORS[colorIndex])
     setShowForm(false)
+    setShowIconPicker(false)
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>📋 Tasks</h1>
-        <button className={styles.addButton} onClick={() => setShowForm(true)}>
+        <button className={styles.addButton} onClick={openForm}>
           ➕
         </button>
       </div>
 
       {showForm && (
-        <TaskForm
-          placeholder="✏️ Nom du groupe..."
-          onSubmit={handleAddGroup}
-          onCancel={() => setShowForm(false)}
-        />
+        <div className={styles.createGroup}>
+          <button
+            className={styles.iconBtn}
+            onClick={() => setShowIconPicker((v) => !v)}
+            title="Choisir un emoji"
+          >
+            {newGroupIcon}
+          </button>
+          {showIconPicker && (
+            <EmojiPicker
+              onSelect={setNewGroupIcon}
+              onClose={() => setShowIconPicker(false)}
+            />
+          )}
+          <div className={styles.createGroupForm}>
+            <TaskForm
+              placeholder="✏️ Nom du groupe..."
+              onSubmit={handleAddGroup}
+              onCancel={() => {
+                setShowForm(false)
+                setShowIconPicker(false)
+              }}
+            />
+          </div>
+        </div>
       )}
 
       <DragDropContext onDragEnd={handleDragEnd}>

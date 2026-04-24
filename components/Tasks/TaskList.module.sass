@@ -23,6 +23,32 @@
   flex-direction: column
   gap: 16px
 
+.createGroup
+  position: relative
+  display: flex
+  align-items: stretch
+  gap: 8px
+  margin-bottom: 16px
+
+.createGroupForm
+  flex: 1
+  min-width: 0
+
+.iconBtn
+  +card
+  +card-border
+  width: 48px
+  flex-shrink: 0
+  font-size: 22px
+  display: flex
+  align-items: center
+  justify-content: center
+  border-radius: $card-radius
+  transition: background $hover-transition
+
+  &:hover
+    background: $hover-bg
+
 .empty
   text-align: center
   padding: 48px 0

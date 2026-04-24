@@ -19,8 +19,17 @@
   align-items: center
   gap: 8px
 
+.iconWrap
+  position: relative
+
 .icon
   font-size: 18px
+  padding: 2px 4px
+  border-radius: 6px
+  transition: background $hover-transition
+
+  &:hover
+    background: $hover-bg
 
 .title
   +base-m

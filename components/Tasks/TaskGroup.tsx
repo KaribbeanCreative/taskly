@@ -6,6 +6,7 @@ import { TaskGroup as TaskGroupType } from '@/types'
 import { useTasksStore } from '@/store/useTasksStore'
 import TaskCard from './TaskCard'
 import TaskForm from './TaskForm'
+import EmojiPicker from './EmojiPicker'
 import styles from './TaskGroup.module.sass'
 
 interface TaskGroupProps {
@@ -16,6 +17,7 @@ export default function TaskGroup({ group }: TaskGroupProps) {
   const { addTask, deleteGroup, updateGroup } = useTasksStore()
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [showIconPicker, setShowIconPicker] = useState(false)
 
   const completedCount = group.tasks.filter((t) => t.completed).length
 
@@ -23,7 +25,21 @@ export default function TaskGroup({ group }: TaskGroupProps) {
     <div className={styles.group}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <span className={styles.icon}>{group.icon}</span>
+          <div className={styles.iconWrap}>
+            <button
+              className={styles.icon}
+              onClick={() => setShowIconPicker((v) => !v)}
+              title="Changer l'emoji"
+            >
+              {group.icon}
+            </button>
+            {showIconPicker && (
+              <EmojiPicker
+                onSelect={(emoji) => updateGroup(group.id, { icon: emoji })}
+                onClose={() => setShowIconPicker(false)}
+              />
+            )}
+          </div>
           {isEditing ? (
             <TaskForm
               placeholder="✏️ Nom du groupe..."

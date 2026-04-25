@@ -3,114 +3,191 @@
 @use "../../styles/animations" as *
 
 .card
-  padding: 10px 12px
-  border-radius: 8px
-  border: 1px solid transparent
-  transition: background $hover-transition, border-color $hover-transition, box-shadow $hover-transition, backdrop-filter $hover-transition
+  +card
+  +card-border
   +fade-in
+  padding: 16px
+  transition: opacity $hover-transition
 
-  &:hover
-    +glass-hover
+  &.elevated
+    z-index: 10
 
   &.completed
     opacity: 0.5
 
-.row
+.header
+  position: relative
   display: flex
-  align-items: flex-start
-  gap: 10px
+  align-items: center
+  justify-content: space-between
+  gap: 8px
+
+.headerLeft
+  display: flex
+  align-items: center
+  gap: 8px
+  flex: 1
+  min-width: 0
+  flex-wrap: nowrap
 
 .checkbox
-  width: 20px
-  height: 20px
-  min-width: 20px
+  width: 22px
+  height: 22px
+  min-width: 22px
   border-radius: 6px
-  border: 1.5px solid rgba($n2, .25)
+  border: 1.5px solid alpha('n2', .25)
   display: flex
   align-items: center
   justify-content: center
   +small
   color: $text-primary
   transition: all $hover-transition
-  margin-top: 2px
+  flex-shrink: 0
 
   &.checked
-    background: rgba($n2, .15)
-    border-color: rgba($n2, .4)
+    background: alpha('n2', .15)
+    border-color: alpha('n2', .4)
+
+.iconWrap
+  position: relative
+  flex-shrink: 0
+
+.icon
+  font-size: 1.125rem
+  height: 22px
+  min-width: 22px
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  padding: 0 4px
+  border-radius: 6px
+  line-height: 1
+  transition: background $hover-transition
+
+  &:hover
+    background: $hover-bg
 
 .priority
-  width: 8px
-  height: 8px
-  min-width: 8px
-  border-radius: 50%
-  margin-top: 7px
+  display: inline-flex
+  align-items: center
+  gap: 5px
+  height: 22px
+  padding: 0 10px
+  border-radius: 11px
+  cursor: pointer
+  transition: transform $hover-transition
+  border: 1px solid transparent
+  flex-shrink: 0
+  line-height: 1
 
   &.low
-    background: $priority-low
+    background: rgba($priority-low, .15)
+    border-color: rgba($priority-low, .35)
+    color: $priority-low
 
   &.medium
-    background: $priority-medium
+    background: rgba($priority-medium, .15)
+    border-color: rgba($priority-medium, .35)
+    color: $priority-medium
 
   &.high
-    background: $priority-high
+    background: rgba($priority-high, .15)
+    border-color: rgba($priority-high, .35)
+    color: $priority-high
 
-.content
+  &:hover
+    transform: scale(1.05)
+
+.priorityDot
+  font-size: 0.5625rem
+  display: inline-flex
+  align-items: center
+
+.priorityText
+  font-size: 0.625rem
+  font-weight: 700
+  text-transform: uppercase
+  letter-spacing: 0.5px
+  display: inline-flex
+  align-items: center
+
+.titleWrap
   flex: 1
   min-width: 0
+  display: flex
+  align-items: center
 
 .title
-  +base-2r
+  +base-m
+  font-family: var(--font-space-grotesk), sans-serif
   color: $text-primary
-  display: block
+  cursor: default
+  white-space: nowrap
+  overflow: hidden
+  text-overflow: ellipsis
+  width: 100%
+  margin: 0
+  line-height: 1.2
 
   &.done
     text-decoration: line-through
     color: $text-tertiary
 
-.meta
-  display: flex
-  align-items: center
-  gap: 8px
-  margin-top: 2px
-
 .date
   +caption-r
   color: $text-tertiary
+  flex-shrink: 0
+  white-space: nowrap
+  cursor: pointer
+  padding: 2px 6px
+  border-radius: 6px
+  transition: background $hover-transition, color $hover-transition
+  line-height: 1
+
+  &:hover
+    background: $hover-bg
+    color: $text-secondary
 
   &.overdue
     color: $priority-high
+
+    &:hover
+      color: $priority-high
 
 .subCount
   +caption-r
   color: $text-tertiary
   cursor: pointer
-  padding: 0
+  padding: 2px 6px
+  border-radius: 6px
+  flex-shrink: 0
+  white-space: nowrap
+  transition: background $hover-transition, color $hover-transition
+  line-height: 1
+
   &:hover
+    background: $hover-bg
     color: $text-secondary
 
 .actions
   display: flex
-  gap: 2px
-  opacity: 0
-  transition: opacity $hover-transition
-
-  .card:hover &
-    opacity: 1
-
-  +mobile
-    opacity: 1
+  gap: 4px
+  flex-shrink: 0
 
 .smallBtn
-  width: 24px
-  height: 24px
-  border-radius: 6px
-  display: flex
-  align-items: center
-  justify-content: center
-  +small
-  color: $text-tertiary
-  transition: all $hover-transition
+  +icon-button
+  width: 28px
+  height: 28px
+  +caption-sm
 
-  &:hover
-    background: $hover-bg
-    color: $text-primary
+.hiddenDate
+  position: absolute
+  width: 1px
+  height: 1px
+  padding: 0
+  margin: 0
+  border: 0
+  opacity: 0
+  pointer-events: none
+  bottom: 0
+  right: 80px

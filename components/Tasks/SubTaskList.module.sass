@@ -3,8 +3,8 @@
 @use "../../styles/animations" as *
 
 .container
-  padding-left: 30px
-  margin-top: 8px
+  padding-left: 33px
+  margin-top: 16px
   display: flex
   flex-direction: column
   gap: 4px
@@ -21,7 +21,7 @@
   height: 16px
   min-width: 16px
   border-radius: 4px
-  border: 1.5px solid rgba($n2, .2)
+  border: 1.5px solid alpha('n2', .2)
   display: flex
   align-items: center
   justify-content: center
@@ -30,11 +30,12 @@
   transition: all $hover-transition
 
   &.checked
-    background: rgba($n2, .12)
-    border-color: rgba($n2, .3)
+    background: alpha('n2', .12)
+    border-color: alpha('n2', .3)
 
 .title
   +caption-r
+  font-size: 1.03125rem
   color: $text-secondary
 
   &.done

@@ -10,18 +10,12 @@ export type SubTask = {
 export type Task = {
   id: string
   title: string
+  icon: string
+  color: string
   completed: boolean
   priority: Priority | null
   dueDate: string | null
   subTasks: SubTask[]
-}
-
-export type TaskGroup = {
-  id: string
-  title: string
-  icon: string
-  color: string
-  tasks: Task[]
 }
 
 // ---- GOALS ----

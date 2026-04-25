@@ -8,17 +8,16 @@ import styles from './SubTaskList.module.sass'
 
 interface SubTaskListProps {
   task: Task
-  groupId: string
 }
 
-export default function SubTaskList({ task, groupId }: SubTaskListProps) {
+export default function SubTaskList({ task }: SubTaskListProps) {
   const { addSubTask, toggleSubTask, deleteSubTask } = useTasksStore()
   const [newTitle, setNewTitle] = useState('')
 
   const handleAdd = () => {
     const trimmed = newTitle.trim()
     if (trimmed) {
-      addSubTask(groupId, task.id, trimmed)
+      addSubTask(task.id, trimmed)
       setNewTitle('')
     }
   }
@@ -36,7 +35,7 @@ export default function SubTaskList({ task, groupId }: SubTaskListProps) {
         <div key={st.id} className={styles.item}>
           <button
             className={cn(styles.checkbox, { [styles.checked]: st.completed })}
-            onClick={() => toggleSubTask(groupId, task.id, st.id)}
+            onClick={() => toggleSubTask(task.id, st.id)}
           >
             {st.completed ? '✅' : '⬜'}
           </button>
@@ -45,7 +44,7 @@ export default function SubTaskList({ task, groupId }: SubTaskListProps) {
           </span>
           <button
             className={styles.deleteBtn}
-            onClick={() => deleteSubTask(groupId, task.id, st.id)}
+            onClick={() => deleteSubTask(task.id, st.id)}
           >
             ❌
           </button>

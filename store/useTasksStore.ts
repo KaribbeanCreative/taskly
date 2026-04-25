@@ -1,166 +1,151 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
-import { Task, TaskGroup, SubTask } from '@/types'
+import { Task, SubTask } from '@/types'
 import { sanitizeTitle } from '@/utils/sanitize'
 
 interface TasksState {
-  groups: TaskGroup[]
-  addGroup: (title: string, icon: string, color: string) => void
-  updateGroup: (id: string, updates: Partial<Pick<TaskGroup, 'title' | 'icon' | 'color'>>) => void
-  deleteGroup: (id: string) => void
-  reorderGroups: (startIndex: number, endIndex: number) => void
-  addTask: (groupId: string, title: string) => void
-  updateTask: (groupId: string, taskId: string, updates: Partial<Omit<Task, 'id' | 'subTasks'>>) => void
-  deleteTask: (groupId: string, taskId: string) => void
-  toggleTask: (groupId: string, taskId: string) => void
-  reorderTasks: (groupId: string, startIndex: number, endIndex: number) => void
-  moveTask: (sourceGroupId: string, destGroupId: string, sourceIndex: number, destIndex: number) => void
-  addSubTask: (groupId: string, taskId: string, title: string) => void
-  toggleSubTask: (groupId: string, taskId: string, subTaskId: string) => void
-  deleteSubTask: (groupId: string, taskId: string, subTaskId: string) => void
+  tasks: Task[]
+  addTask: (title: string, icon: string, color: string) => void
+  updateTask: (
+    id: string,
+    updates: Partial<Pick<Task, 'title' | 'icon' | 'color' | 'priority' | 'dueDate'>>
+  ) => void
+  toggleTask: (id: string) => void
+  deleteTask: (id: string) => void
+  reorderTasks: (startIndex: number, endIndex: number) => void
+  addSubTask: (taskId: string, title: string) => void
+  toggleSubTask: (taskId: string, subTaskId: string) => void
+  deleteSubTask: (taskId: string, subTaskId: string) => void
 }
 
-const updateGroupTasks = (
-  groups: TaskGroup[],
-  groupId: string,
-  updater: (tasks: Task[]) => Task[]
-): TaskGroup[] =>
-  groups.map((g) => (g.id === groupId ? { ...g, tasks: updater(g.tasks) } : g))
-
-const updateTaskInGroup = (
-  groups: TaskGroup[],
-  groupId: string,
-  taskId: string,
+const updateTaskInList = (
+  tasks: Task[],
+  id: string,
   updater: (task: Task) => Task
-): TaskGroup[] =>
-  updateGroupTasks(groups, groupId, (tasks) =>
-    tasks.map((t) => (t.id === taskId ? updater(t) : t))
-  )
+): Task[] => tasks.map((t) => (t.id === id ? updater(t) : t))
+
+const PRIORITY_RANK: Record<NonNullable<Task['priority']>, number> = {
+  high: 0,
+  medium: 1,
+  low: 2,
+}
+
+const priorityRank = (p: Task['priority']): number =>
+  p ? PRIORITY_RANK[p] : 3
+
+// Active first, then completed. Within each, sorted by priority (high → med → low → none).
+// Array.prototype.sort is stable, so manual order is preserved within priority buckets.
+const sortTasks = (tasks: Task[]): Task[] =>
+  [...tasks].sort((a, b) => {
+    if (a.completed !== b.completed) return a.completed ? 1 : -1
+    return priorityRank(a.priority) - priorityRank(b.priority)
+  })
+
+type LegacySubTask = { id: string; title: string; completed: boolean }
+type LegacyTask = {
+  id: string
+  title: string
+  completed: boolean
+  priority: Task['priority']
+  dueDate: string | null
+  subTasks?: LegacySubTask[]
+}
+type LegacyGroup = {
+  id: string
+  title: string
+  icon: string
+  color: string
+  tasks?: LegacyTask[]
+}
+type LegacyState = { groups?: LegacyGroup[] }
+
+// v1 (groups → tasks → subTasks) becomes v2 (tasks → subTasks).
+// Each old group's tasks are flattened to top-level, inheriting the group's icon/color.
+// Old group titles are preserved by prefixing them on each promoted task title.
+function migrateV1ToV2(legacy: LegacyState): { tasks: Task[] } {
+  const tasks: Task[] = []
+  for (const group of legacy.groups ?? []) {
+    for (const t of group.tasks ?? []) {
+      tasks.push({
+        id: t.id,
+        title: t.title,
+        icon: group.icon,
+        color: group.color,
+        completed: t.completed,
+        priority: t.priority,
+        dueDate: t.dueDate,
+        subTasks: (t.subTasks ?? []).map((st) => ({
+          id: st.id,
+          title: st.title,
+          completed: st.completed,
+        })),
+      })
+    }
+  }
+  return { tasks }
+}
 
 export const useTasksStore = create<TasksState>()(
   persist(
     (set) => ({
-      groups: [],
+      tasks: [],
 
-      addGroup: (title, icon, color) => {
+      addTask: (title, icon, color) => {
         const sanitized = sanitizeTitle(title)
         if (!sanitized) return
-        set((state) => ({
-          groups: [
-            ...state.groups,
-            { id: uuidv4(), title: sanitized, icon, color, tasks: [] },
-          ],
-        }))
+        set((state) => {
+          const newTask: Task = {
+            id: uuidv4(),
+            title: sanitized,
+            icon,
+            color,
+            completed: false,
+            priority: null,
+            dueDate: null,
+            subTasks: [],
+          }
+          return { tasks: sortTasks([...state.tasks, newTask]) }
+        })
       },
 
-      updateGroup: (id, updates) =>
+      updateTask: (id, updates) =>
         set((state) => ({
-          groups: state.groups.map((g) =>
-            g.id === id
-              ? {
-                  ...g,
-                  ...(updates.title !== undefined
-                    ? { title: sanitizeTitle(updates.title) }
-                    : {}),
-                  ...(updates.icon !== undefined ? { icon: updates.icon } : {}),
-                  ...(updates.color !== undefined ? { color: updates.color } : {}),
-                }
-              : g
+          tasks: sortTasks(
+            updateTaskInList(state.tasks, id, (t) => ({
+              ...t,
+              ...updates,
+              ...(updates.title !== undefined
+                ? { title: sanitizeTitle(updates.title) }
+                : {}),
+            }))
           ),
         })),
 
-      deleteGroup: (id) =>
+      toggleTask: (id) =>
         set((state) => ({
-          groups: state.groups.filter((g) => g.id !== id),
+          tasks: sortTasks(
+            updateTaskInList(state.tasks, id, (t) => ({
+              ...t,
+              completed: !t.completed,
+            }))
+          ),
         })),
 
-      reorderGroups: (startIndex, endIndex) =>
+      deleteTask: (id) =>
+        set((state) => ({
+          tasks: state.tasks.filter((t) => t.id !== id),
+        })),
+
+      reorderTasks: (startIndex, endIndex) =>
         set((state) => {
-          const result = [...state.groups]
+          const result = [...state.tasks]
           const [removed] = result.splice(startIndex, 1)
           result.splice(endIndex, 0, removed)
-          return { groups: result }
+          return { tasks: sortTasks(result) }
         }),
 
-      addTask: (groupId, title) => {
-        const sanitized = sanitizeTitle(title)
-        if (!sanitized) return
-        const newTask: Task = {
-          id: uuidv4(),
-          title: sanitized,
-          completed: false,
-          priority: null,
-          dueDate: null,
-          subTasks: [],
-        }
-        set((state) => ({
-          groups: updateGroupTasks(state.groups, groupId, (tasks) => [
-            ...tasks,
-            newTask,
-          ]),
-        }))
-      },
-
-      updateTask: (groupId, taskId, updates) =>
-        set((state) => ({
-          groups: updateTaskInGroup(state.groups, groupId, taskId, (t) => ({
-            ...t,
-            ...updates,
-            ...(updates.title !== undefined
-              ? { title: sanitizeTitle(updates.title) }
-              : {}),
-          })),
-        })),
-
-      deleteTask: (groupId, taskId) =>
-        set((state) => ({
-          groups: updateGroupTasks(state.groups, groupId, (tasks) =>
-            tasks.filter((t) => t.id !== taskId)
-          ),
-        })),
-
-      toggleTask: (groupId, taskId) =>
-        set((state) => ({
-          groups: updateTaskInGroup(state.groups, groupId, taskId, (t) => ({
-            ...t,
-            completed: !t.completed,
-          })),
-        })),
-
-      reorderTasks: (groupId, startIndex, endIndex) =>
-        set((state) => ({
-          groups: updateGroupTasks(state.groups, groupId, (tasks) => {
-            const result = [...tasks]
-            const [removed] = result.splice(startIndex, 1)
-            result.splice(endIndex, 0, removed)
-            return result
-          }),
-        })),
-
-      moveTask: (sourceGroupId, destGroupId, sourceIndex, destIndex) =>
-        set((state) => {
-          const groups = [...state.groups]
-          const sourceGroup = groups.find((g) => g.id === sourceGroupId)
-          const destGroup = groups.find((g) => g.id === destGroupId)
-          if (!sourceGroup || !destGroup) return state
-
-          const sourceTasks = [...sourceGroup.tasks]
-          const destTasks =
-            sourceGroupId === destGroupId ? sourceTasks : [...destGroup.tasks]
-          const [removed] = sourceTasks.splice(sourceIndex, 1)
-          destTasks.splice(destIndex, 0, removed)
-
-          return {
-            groups: groups.map((g) => {
-              if (g.id === sourceGroupId) return { ...g, tasks: sourceTasks }
-              if (g.id === destGroupId) return { ...g, tasks: destTasks }
-              return g
-            }),
-          }
-        }),
-
-      addSubTask: (groupId, taskId, title) => {
+      addSubTask: (taskId, title) => {
         const sanitized = sanitizeTitle(title)
         if (!sanitized) return
         const newSubTask: SubTask = {
@@ -169,31 +154,43 @@ export const useTasksStore = create<TasksState>()(
           completed: false,
         }
         set((state) => ({
-          groups: updateTaskInGroup(state.groups, groupId, taskId, (t) => ({
-            ...t,
-            subTasks: [...t.subTasks, newSubTask],
-          })),
+          tasks: updateTaskInList(state.tasks, taskId, (t) => {
+            const active = t.subTasks.filter((st) => !st.completed)
+            const completed = t.subTasks.filter((st) => st.completed)
+            return { ...t, subTasks: [...active, newSubTask, ...completed] }
+          }),
         }))
       },
 
-      toggleSubTask: (groupId, taskId, subTaskId) =>
+      toggleSubTask: (taskId, subTaskId) =>
         set((state) => ({
-          groups: updateTaskInGroup(state.groups, groupId, taskId, (t) => ({
-            ...t,
-            subTasks: t.subTasks.map((st) =>
+          tasks: updateTaskInList(state.tasks, taskId, (t) => {
+            const updated = t.subTasks.map((st) =>
               st.id === subTaskId ? { ...st, completed: !st.completed } : st
-            ),
-          })),
+            )
+            const active = updated.filter((st) => !st.completed)
+            const completed = updated.filter((st) => st.completed)
+            return { ...t, subTasks: [...active, ...completed] }
+          }),
         })),
 
-      deleteSubTask: (groupId, taskId, subTaskId) =>
+      deleteSubTask: (taskId, subTaskId) =>
         set((state) => ({
-          groups: updateTaskInGroup(state.groups, groupId, taskId, (t) => ({
+          tasks: updateTaskInList(state.tasks, taskId, (t) => ({
             ...t,
             subTasks: t.subTasks.filter((st) => st.id !== subTaskId),
           })),
         })),
     }),
-    { name: 'tasks-storage' }
+    {
+      name: 'tasks-storage',
+      version: 2,
+      migrate: (persistedState, version) => {
+        if (version < 2) {
+          return migrateV1ToV2(persistedState as LegacyState) as unknown as TasksState
+        }
+        return persistedState as TasksState
+      },
+    }
   )
 )

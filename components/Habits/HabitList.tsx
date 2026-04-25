@@ -1,14 +1,21 @@
 'use client'
 
 import { useState } from 'react'
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { useHabitsStore } from '@/store/useHabitsStore'
 import HabitCard from './HabitCard'
 import HabitForm from './HabitForm'
 import styles from './HabitList.module.sass'
 
 export default function HabitList() {
-  const { habits, addHabit } = useHabitsStore()
+  const { habits, addHabit, reorderHabits } = useHabitsStore()
   const [showForm, setShowForm] = useState(false)
+
+  const handleDragEnd = (result: DropResult) => {
+    const { source, destination } = result
+    if (!destination || source.index === destination.index) return
+    reorderHabits(source.index, destination.index)
+  }
 
   return (
     <div className={styles.container}>
@@ -29,11 +36,32 @@ export default function HabitList() {
         />
       )}
 
-      <div className={styles.list}>
-        {habits.map((habit) => (
-          <HabitCard key={habit.id} habit={habit} />
-        ))}
-      </div>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="habits" type="habit">
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className={styles.list}
+            >
+              {habits.map((habit, index) => (
+                <Draggable key={habit.id} draggableId={habit.id} index={index}>
+                  {(dragProvided) => (
+                    <div
+                      ref={dragProvided.innerRef}
+                      {...dragProvided.draggableProps}
+                      {...dragProvided.dragHandleProps}
+                    >
+                      <HabitCard habit={habit} />
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       {habits.length === 0 && !showForm && (
         <div className={styles.empty}>

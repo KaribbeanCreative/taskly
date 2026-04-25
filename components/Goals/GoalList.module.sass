@@ -17,6 +17,11 @@
 
 .addButton
   +icon-button
+  &:disabled
+    opacity: .4
+    cursor: not-allowed
+    &:hover
+      background: $btn-bg
 
 .tabs
   display: flex
@@ -42,7 +47,7 @@
 
   &.active
     color: $text-primary
-    background: rgba($n2, .1)
+    background: alpha('n2', .1)
 
 .progress
   +caption-r

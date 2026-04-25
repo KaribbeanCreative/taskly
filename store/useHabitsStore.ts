@@ -10,6 +10,7 @@ interface HabitsState {
   deleteHabit: (id: string) => void
   updateHabit: (id: string, updates: Partial<Pick<Habit, 'name' | 'color'>>) => void
   toggleDate: (id: string, date: string) => void
+  reorderHabits: (startIndex: number, endIndex: number) => void
 }
 
 export const useHabitsStore = create<HabitsState>()(
@@ -67,6 +68,14 @@ export const useHabitsStore = create<HabitsState>()(
             }
           }),
         })),
+
+      reorderHabits: (startIndex, endIndex) =>
+        set((state) => {
+          const result = [...state.habits]
+          const [removed] = result.splice(startIndex, 1)
+          result.splice(endIndex, 0, removed)
+          return { habits: result }
+        }),
     }),
     { name: 'habits-storage' }
   )

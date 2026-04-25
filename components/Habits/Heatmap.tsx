@@ -1,9 +1,13 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Habit } from '@/types'
 import { useHabitsStore } from '@/store/useHabitsStore'
 import styles from './Heatmap.module.sass'
+
+const MOBILE_BREAKPOINT_PX = 767
+const WEEKS_DESKTOP = 52
+const WEEKS_MOBILE = 26
 
 interface HeatmapProps {
   habit: Habit
@@ -19,14 +23,14 @@ function formatLocalDate(date: Date): string {
   return `${y}-${m}-${d}`
 }
 
-function getWeekGrid(): { date: Date; dateStr: string }[][] {
+function getWeekGrid(weeksBack: number): { date: Date; dateStr: string }[][] {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  // Find the start: go back ~52 weeks to the nearest Monday
+  // Find the start: go back N weeks to the nearest Monday
   const start = new Date(today)
   const daysSinceMonday = (start.getDay() + 6) % 7
-  start.setDate(start.getDate() - daysSinceMonday - 52 * 7)
+  start.setDate(start.getDate() - daysSinceMonday - weeksBack * 7)
 
   const weeks: { date: Date; dateStr: string }[][] = []
   const current = new Date(start)
@@ -70,7 +74,18 @@ export default function Heatmap({ habit }: HeatmapProps) {
   const { toggleDate } = useHabitsStore()
   const completedSet = useMemo(() => new Set(habit.completedDates), [habit.completedDates])
 
-  const weeks = useMemo(() => getWeekGrid(), [])
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT_PX}px)`)
+    const sync = () => setIsMobile(mql.matches)
+    sync()
+    mql.addEventListener('change', sync)
+    return () => mql.removeEventListener('change', sync)
+  }, [])
+
+  const weeksBack = isMobile ? WEEKS_MOBILE : WEEKS_DESKTOP
+  const weeks = useMemo(() => getWeekGrid(weeksBack), [weeksBack])
   const monthLabels = useMemo(() => getMonthLabels(weeks), [weeks])
 
   const totalDays = weeks.reduce((acc, w) => acc + w.length, 0)

@@ -1,0 +1,122 @@
+@use "../../styles/variables" as *
+@use "../../styles/mixins" as *
+
+.container
+  min-height: 100vh
+  display: flex
+  align-items: center
+  justify-content: center
+  padding: 24px
+
+.card
+  width: 100%
+  max-width: 420px
+  padding: 40px 32px
+  background: $card-bg
+  border: 1px solid $border-subtle
+  border-radius: 16px
+  backdrop-filter: $card-blur
+
+.logo
+  +title
+  color: $text-primary
+  font-size: 1.75rem
+  text-align: center
+  margin-bottom: 8px
+
+.tagline
+  +base-r
+  color: $text-tertiary
+  text-align: center
+  margin-bottom: 32px
+
+.form
+  display: flex
+  flex-direction: column
+  gap: 12px
+
+.label
+  +base-2m
+  color: $text-secondary
+  margin-bottom: 4px
+
+.input
+  +base-r
+  width: 100%
+  padding: 12px 14px
+  background: alpha('n2', .04)
+  border: 1px solid $border-subtle
+  border-radius: 10px
+  color: $text-primary
+  transition: border $hover-transition, background $hover-transition
+
+  &:focus
+    outline: none
+    border-color: alpha('n2', .25)
+    background: alpha('n2', .07)
+
+  &::placeholder
+    color: $text-tertiary
+
+  &:disabled
+    opacity: .6
+    cursor: not-allowed
+
+.submit
+  +base-2m
+  padding: 12px
+  background: $btn-bg
+  color: $text-primary
+  border: 1px solid $border-subtle
+  border-radius: 10px
+  cursor: pointer
+  transition: background $hover-transition
+
+  &:hover:not(:disabled)
+    background: $hover-bg
+
+  &:disabled
+    opacity: .5
+    cursor: not-allowed
+
+.hint
+  +caption-r
+  color: $text-tertiary
+  text-align: center
+  margin-top: 8px
+
+.error
+  +caption-r
+  color: $priority-high
+  text-align: center
+  margin-top: 4px
+
+.sent
+  text-align: center
+
+  h2
+    +title
+    color: $text-primary
+    font-size: 1.25rem
+    margin-bottom: 12px
+
+  p
+    +base-r
+    color: $text-secondary
+    line-height: 1.5
+
+.sentIcon
+  font-size: 3rem
+  margin-bottom: 16px
+
+.linkButton
+  +base-2m
+  margin-top: 20px
+  color: $text-tertiary
+  background: transparent
+  border: none
+  cursor: pointer
+  transition: color $hover-transition
+
+  &:hover
+    color: $text-primary

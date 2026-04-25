@@ -1,0 +1,19 @@
+@use "../../styles/variables" as *
+
+.loader
+  min-height: 100vh
+  display: flex
+  align-items: center
+  justify-content: center
+
+.spinner
+  font-size: 2.5rem
+  animation: pulse 1.4s ease-in-out infinite
+
+@keyframes pulse
+  0%, 100%
+    opacity: .4
+    transform: scale(.95)
+  50%
+    opacity: 1
+    transform: scale(1.05)

@@ -2,6 +2,8 @@
 
 import { Section } from '@/types'
 import cn from 'classnames'
+import ThemeToggle from '@/components/ThemeToggle/ThemeToggle'
+import SignOutButton from '@/components/Auth/SignOutButton'
 import styles from './Navigation.module.sass'
 
 interface NavigationProps {
@@ -36,6 +38,10 @@ export default function Navigation({ active, onChange }: NavigationProps) {
             </li>
           ))}
         </ul>
+        <div className={styles.sidebarFooter}>
+          <ThemeToggle />
+          <SignOutButton />
+        </div>
       </nav>
 
       {/* 📱 Mobile bottom bar */}
@@ -52,6 +58,12 @@ export default function Navigation({ active, onChange }: NavigationProps) {
             <span className={styles.bottomLabel}>{s.label}</span>
           </button>
         ))}
+        <div className={styles.bottomItem}>
+          <ThemeToggle />
+        </div>
+        <div className={styles.bottomItem}>
+          <SignOutButton />
+        </div>
       </nav>
     </>
   )

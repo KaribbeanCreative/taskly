@@ -10,7 +10,7 @@
   display: flex
   flex-direction: column
   padding: 24px 16px
-  border-right: 1px solid rgba($n2, .08)
+  border-right: 1px solid alpha('n2', .08)
 
   +tablet
     width: $nav-compact
@@ -29,13 +29,26 @@
     padding: 8px 0
     font-size: 0
     &::first-letter
-      font-size: 20px
+      font-size: 1.25rem
 
 .menu
   list-style: none
   display: flex
   flex-direction: column
   gap: 4px
+  flex: 1
+
+.sidebarFooter
+  margin-top: auto
+  padding-top: 16px
+  display: flex
+  align-items: center
+  justify-content: flex-start
+  gap: 8px
+
+  +tablet
+    flex-direction: column
+    justify-content: center
 
 .menuItem
   display: flex
@@ -58,11 +71,11 @@
     color: $text-primary
 
   &.active
-    background: rgba($n2, .1)
+    background: alpha('n2', .1)
     color: $text-primary
 
 .icon
-  font-size: 18px
+  font-size: 1.125rem
   width: 24px
   text-align: center
   flex-shrink: 0
@@ -82,9 +95,9 @@
     left: 0
     right: 0
     height: $bottom-bar-height
-    background: rgba($n4, .95)
+    background: alpha('n4', .95)
     backdrop-filter: blur(20px)
-    border-top: 1px solid rgba($n2, .08)
+    border-top: 1px solid alpha('n2', .08)
     z-index: 100
 
 .bottomItem
@@ -101,7 +114,7 @@
     color: $text-primary
 
   .icon
-    font-size: 20px
+    font-size: 1.25rem
 
 .bottomLabel
   +small

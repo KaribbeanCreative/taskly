@@ -1,0 +1,21 @@
+@use "../../styles/variables" as *
+@use "../../styles/mixins" as *
+
+.button
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  width: 36px
+  height: 36px
+  border-radius: 10px
+  background: transparent
+  color: $text-secondary
+  transition: background $hover-transition, color $hover-transition
+
+  &:hover
+    background: $hover-bg
+    color: $text-primary
+
+.icon
+  font-size: 1.125rem
+  line-height: 1

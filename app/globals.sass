@@ -1,6 +1,58 @@
 @use "../styles/variables" as *
 @use "../styles/animations"
 
+// ──────────────────────────────────────────────────────────
+// Theme — Dark (default)
+// ──────────────────────────────────────────────────────────
+:root
+  --bg: #191919
+  --text-primary: rgba(248, 248, 248, .95)
+  --text-secondary: rgba(248, 248, 248, .70)
+  --text-tertiary: rgba(248, 248, 248, .50)
+
+  --card-bg: rgba(248, 248, 248, .05)
+  --btn-bg: rgba(40, 40, 40, .70)
+  --btn-shadow: 2px 4px 16px 0px rgba(248, 248, 248, 0.06) inset
+  --tooltip-bg: rgba(40, 40, 40, .60)
+  --hover-bg: rgba(248, 248, 248, .1)
+  --border-subtle: 1.5px solid rgba(255, 255, 255, 0.1)
+
+  --glass-hover-bg: rgba(248, 248, 248, .07)
+  --glass-hover-border: 1px solid rgba(248, 248, 248, .14)
+  --glass-hover-shadow: 0 8px 24px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(248, 248, 248, .08)
+
+  // RGB triples for inline alpha() helper
+  --n2-rgb: 248, 248, 248
+  --n3-rgb: 40, 40, 40
+  --n4-rgb: 18, 18, 18
+
+// ──────────────────────────────────────────────────────────
+// Theme — Light
+// ──────────────────────────────────────────────────────────
+[data-theme='light']
+  --bg: #fafafa
+  --text-primary: rgba(20, 20, 20, .95)
+  --text-secondary: rgba(20, 20, 20, .70)
+  --text-tertiary: rgba(20, 20, 20, .50)
+
+  --card-bg: rgba(20, 20, 20, .04)
+  --btn-bg: rgba(255, 255, 255, .85)
+  --btn-shadow: 2px 4px 16px 0px rgba(20, 20, 20, 0.05) inset
+  --tooltip-bg: rgba(20, 20, 20, .85)
+  --hover-bg: rgba(20, 20, 20, .06)
+  --border-subtle: 1.5px solid rgba(20, 20, 20, .1)
+
+  --glass-hover-bg: rgba(255, 255, 255, .5)
+  --glass-hover-border: 1px solid rgba(20, 20, 20, .08)
+  --glass-hover-shadow: 0 8px 24px rgba(0, 0, 0, .08), inset 0 1px 0 rgba(255, 255, 255, .5)
+
+  --n2-rgb: 20, 20, 20
+  --n3-rgb: 255, 255, 255
+  --n4-rgb: 250, 250, 250
+
+// ──────────────────────────────────────────────────────────
+// Reset + base
+// ──────────────────────────────────────────────────────────
 *
   margin: 0
   padding: 0
@@ -13,6 +65,7 @@ html, body
   font-family: var(--font-rubik), sans-serif
   -webkit-font-smoothing: antialiased
   -moz-osx-font-smoothing: grayscale
+  transition: background-color .2s ease, color .2s ease
 
 button
   font-family: inherit
@@ -39,8 +92,8 @@ a
   background: transparent
 
 ::-webkit-scrollbar-thumb
-  background: rgba($n2, .15)
+  background: alpha('n2', .15)
   border-radius: 4px
 
 ::selection
-  background: rgba($n2, .2)
+  background: alpha('n2', .2)

@@ -26,7 +26,7 @@
   height: 22px
   min-width: 22px
   border-radius: 6px
-  border: 1.5px solid rgba($n2, .25)
+  border: 1.5px solid alpha('n2', .25)
   display: flex
   align-items: center
   justify-content: center
@@ -35,11 +35,12 @@
   transition: all $hover-transition
 
   &.checked
-    background: rgba($n2, .15)
-    border-color: rgba($n2, .4)
+    background: alpha('n2', .15)
+    border-color: alpha('n2', .4)
 
 .title
   +base-2r
+  font-family: var(--font-space-grotesk), sans-serif
   color: $text-primary
   flex: 1
 

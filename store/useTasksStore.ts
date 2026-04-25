@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
 import { Task, SubTask } from '@/types'
 import { sanitizeTitle } from '@/utils/sanitize'
+import { getCurrentUserId } from '@/lib/supabase/auth-context'
+import { tasksRepo, subTasksRepo } from '@/lib/supabase/repo'
 
 interface TasksState {
   tasks: Task[]
@@ -42,6 +44,19 @@ const sortTasks = (tasks: Task[]): Task[] =>
     return priorityRank(a.priority) - priorityRank(b.priority)
   })
 
+// Sync side-effect: positions of all tasks in the array.
+const syncTasksOrder = (tasks: Task[]) => {
+  const userId = getCurrentUserId()
+  if (!userId) return
+  tasksRepo.reorderAll(userId, tasks.map((t) => t.id))
+}
+
+const syncSubTasksOrder = (taskId: string, subs: SubTask[]) => {
+  const userId = getCurrentUserId()
+  if (!userId) return
+  subTasksRepo.reorderForTask(userId, taskId, subs.map((s) => s.id))
+}
+
 type LegacySubTask = { id: string; title: string; completed: boolean }
 type LegacyTask = {
   id: string
@@ -60,9 +75,6 @@ type LegacyGroup = {
 }
 type LegacyState = { groups?: LegacyGroup[] }
 
-// v1 (groups → tasks → subTasks) becomes v2 (tasks → subTasks).
-// Each old group's tasks are flattened to top-level, inheriting the group's icon/color.
-// Old group titles are preserved by prefixing them on each promoted task title.
 function migrateV1ToV2(legacy: LegacyState): { tasks: Task[] } {
   const tasks: Task[] = []
   for (const group of legacy.groups ?? []) {
@@ -94,56 +106,84 @@ export const useTasksStore = create<TasksState>()(
       addTask: (title, icon, color) => {
         const sanitized = sanitizeTitle(title)
         if (!sanitized) return
-        set((state) => {
-          const newTask: Task = {
-            id: uuidv4(),
-            title: sanitized,
-            icon,
-            color,
-            completed: false,
-            priority: null,
-            dueDate: null,
-            subTasks: [],
-          }
-          return { tasks: sortTasks([...state.tasks, newTask]) }
-        })
+        const newTask: Task = {
+          id: uuidv4(),
+          title: sanitized,
+          icon,
+          color,
+          completed: false,
+          priority: null,
+          dueDate: null,
+          subTasks: [],
+        }
+        set((state) => ({ tasks: sortTasks([...state.tasks, newTask]) }))
+        const userId = getCurrentUserId()
+        if (userId) {
+          // Upsert the new task at its sorted position, then reorder the rest.
+          const tasksAfter = useTasksStore.getState().tasks
+          const pos = tasksAfter.findIndex((t) => t.id === newTask.id)
+          tasksRepo.upsert(userId, newTask, pos).then(() => syncTasksOrder(tasksAfter))
+        }
       },
 
-      updateTask: (id, updates) =>
+      updateTask: (id, updates) => {
+        const sanitizedUpdates = updates.title !== undefined
+          ? { ...updates, title: sanitizeTitle(updates.title) }
+          : updates
         set((state) => ({
           tasks: sortTasks(
-            updateTaskInList(state.tasks, id, (t) => ({
-              ...t,
-              ...updates,
-              ...(updates.title !== undefined
-                ? { title: sanitizeTitle(updates.title) }
-                : {}),
-            }))
+            updateTaskInList(state.tasks, id, (t) => ({ ...t, ...sanitizedUpdates }))
           ),
-        })),
+        }))
+        const userId = getCurrentUserId()
+        if (userId) {
+          const patch: Record<string, unknown> = {}
+          if (sanitizedUpdates.title !== undefined) patch.title = sanitizedUpdates.title
+          if (sanitizedUpdates.icon !== undefined) patch.icon = sanitizedUpdates.icon
+          if (sanitizedUpdates.color !== undefined) patch.color = sanitizedUpdates.color
+          if (sanitizedUpdates.priority !== undefined) patch.priority = sanitizedUpdates.priority
+          if (sanitizedUpdates.dueDate !== undefined) patch.due_date = sanitizedUpdates.dueDate
+          tasksRepo.update(id, patch).then(() => {
+            // Priority change can change sort position
+            if (sanitizedUpdates.priority !== undefined) {
+              syncTasksOrder(useTasksStore.getState().tasks)
+            }
+          })
+        }
+      },
 
-      toggleTask: (id) =>
-        set((state) => ({
-          tasks: sortTasks(
-            updateTaskInList(state.tasks, id, (t) => ({
-              ...t,
-              completed: !t.completed,
-            }))
-          ),
-        })),
+      toggleTask: (id) => {
+        let nextCompleted = false
+        set((state) => {
+          const updated = updateTaskInList(state.tasks, id, (t) => {
+            nextCompleted = !t.completed
+            return { ...t, completed: nextCompleted }
+          })
+          return { tasks: sortTasks(updated) }
+        })
+        const userId = getCurrentUserId()
+        if (userId) {
+          tasksRepo.update(id, { completed: nextCompleted }).then(() =>
+            syncTasksOrder(useTasksStore.getState().tasks)
+          )
+        }
+      },
 
-      deleteTask: (id) =>
-        set((state) => ({
-          tasks: state.tasks.filter((t) => t.id !== id),
-        })),
+      deleteTask: (id) => {
+        set((state) => ({ tasks: state.tasks.filter((t) => t.id !== id) }))
+        const userId = getCurrentUserId()
+        if (userId) tasksRepo.remove(id)
+      },
 
-      reorderTasks: (startIndex, endIndex) =>
+      reorderTasks: (startIndex, endIndex) => {
         set((state) => {
           const result = [...state.tasks]
           const [removed] = result.splice(startIndex, 1)
           result.splice(endIndex, 0, removed)
           return { tasks: sortTasks(result) }
-        }),
+        })
+        syncTasksOrder(useTasksStore.getState().tasks)
+      },
 
       addSubTask: (taskId, title) => {
         const sanitized = sanitizeTitle(title)
@@ -160,27 +200,50 @@ export const useTasksStore = create<TasksState>()(
             return { ...t, subTasks: [...active, newSubTask, ...completed] }
           }),
         }))
+        const userId = getCurrentUserId()
+        if (userId) {
+          const task = useTasksStore.getState().tasks.find((t) => t.id === taskId)
+          if (!task) return
+          const pos = task.subTasks.findIndex((st) => st.id === newSubTask.id)
+          subTasksRepo
+            .upsert(userId, taskId, newSubTask, pos)
+            .then(() => syncSubTasksOrder(taskId, task.subTasks))
+        }
       },
 
-      toggleSubTask: (taskId, subTaskId) =>
+      toggleSubTask: (taskId, subTaskId) => {
+        let nextCompleted = false
         set((state) => ({
           tasks: updateTaskInList(state.tasks, taskId, (t) => {
-            const updated = t.subTasks.map((st) =>
-              st.id === subTaskId ? { ...st, completed: !st.completed } : st
-            )
+            const updated = t.subTasks.map((st) => {
+              if (st.id !== subTaskId) return st
+              nextCompleted = !st.completed
+              return { ...st, completed: nextCompleted }
+            })
             const active = updated.filter((st) => !st.completed)
             const completed = updated.filter((st) => st.completed)
             return { ...t, subTasks: [...active, ...completed] }
           }),
-        })),
+        }))
+        const userId = getCurrentUserId()
+        if (userId) {
+          subTasksRepo.update(subTaskId, { completed: nextCompleted }).then(() => {
+            const task = useTasksStore.getState().tasks.find((t) => t.id === taskId)
+            if (task) syncSubTasksOrder(taskId, task.subTasks)
+          })
+        }
+      },
 
-      deleteSubTask: (taskId, subTaskId) =>
+      deleteSubTask: (taskId, subTaskId) => {
         set((state) => ({
           tasks: updateTaskInList(state.tasks, taskId, (t) => ({
             ...t,
             subTasks: t.subTasks.filter((st) => st.id !== subTaskId),
           })),
-        })),
+        }))
+        const userId = getCurrentUserId()
+        if (userId) subTasksRepo.remove(subTaskId)
+      },
     }),
     {
       name: 'tasks-storage',

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase/client'
+import { setCurrentUserId } from '@/lib/supabase/auth-context'
 
 type AuthState = {
   user: User | null
@@ -22,11 +23,13 @@ export function useAuth() {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return
+      setCurrentUserId(session?.user.id ?? null)
       setState({ user: session?.user ?? null, session, loading: false })
     })
 
     const { data: subscription } = supabase.auth.onAuthStateChange(
       (_event, session) => {
+        setCurrentUserId(session?.user.id ?? null)
         setState({ user: session?.user ?? null, session, loading: false })
       }
     )

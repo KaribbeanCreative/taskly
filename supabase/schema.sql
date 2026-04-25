@@ -193,3 +193,24 @@ create policy habit_completions_update on public.habit_completions
 
 create policy habit_completions_delete on public.habit_completions
   for delete using (auth.uid() = user_id);
+
+-- ── Realtime ─────────────────────────────────────────────────────────────
+-- Ajoute les 5 tables à la publication supabase_realtime pour que les
+-- INSERT/UPDATE/DELETE soient diffusés via postgres_changes.
+-- Les events respectent RLS automatiquement (un user ne reçoit que ses lignes).
+do $$
+declare
+  tbl text;
+begin
+  foreach tbl in array array['tasks', 'sub_tasks', 'goals', 'habits', 'habit_completions']
+  loop
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = tbl
+    ) then
+      execute format('alter publication supabase_realtime add table public.%I', tbl);
+    end if;
+  end loop;
+end $$;
